@@ -1,0 +1,15 @@
+name: sqlabs
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: sqlabs
+      POSTGRES_PASSWORD: sqlabs_password
+      POSTGRES_DB: sqldb
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
