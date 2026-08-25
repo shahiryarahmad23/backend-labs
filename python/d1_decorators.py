@@ -35,30 +35,6 @@ def test(name):
     
 test("Sherry")
 
-def retry(times):
-    def decorator(func):
-        def wrapper(*arg, **kwargs):
-            for i in range(times):
-                try:
-                    result = func(*arg, **kwargs)
-                    if result:
-                        return result
-                except Exception as e:
-                    raise e 
-        return wrapper
-    return decorator
-
-clock = 0
-
-@retry(times=3)
-def test2():
-    global clock
-    clock += 1
-    if clock < 3:
-        raise ValueError("Boom")
-    return "Ok"    
-            
-print(test2())
 
 def retry(times, on=(Exception,)):
 
