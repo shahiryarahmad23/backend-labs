@@ -34,7 +34,7 @@ def test(name):
     return name
     
 test("Sherry")
-"""
+
 def retry(times):
     def decorator(func):
         def wrapper(*arg, **kwargs):
@@ -59,7 +59,7 @@ def test2():
     return "Ok"    
             
 print(test2())
-"""
+
 def retry(times, on=(Exception,)):
 
     def decorator(func):
