@@ -23,6 +23,5 @@ class TokenPair(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
 
-
-class RefreshToken:
+class RefreshToken(BaseModel):
     refresh_token: str

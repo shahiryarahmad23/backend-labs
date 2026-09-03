@@ -1,0 +1,88 @@
+from datetime import UTC, datetime, timedelta
+
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from klip.core import (
+    create_access_token,
+    create_refresh_token,
+    hash_refresh_token,
+    settings,
+    verify_password_hash,
+)
+from klip.models import RefreshTable,User
+from klip.schemas import TokenPair,RefreshToken
+from klip.exceptions import ExpiredRefreshToken,RevokedRefreshToken,InvalideRefreshToken
+
+
+def login_user(form_data: OAuth2PasswordRequestForm, db: Session):
+
+    user = db.execute(
+        select(User).where(User.email == form_data.username)
+    ).scalar_one_or_none()
+
+    if user is None:
+        raise ValueError("Invalid credentials")
+    if not verify_password_hash(user.hashed_password, form_data.password):
+        raise ValueError("Invalid credentials")
+
+    access = create_access_token(str(user.id))
+    raw_refresh_token = create_refresh_token()
+
+    expire = timedelta(days=settings.refresh_token_expires) + datetime.now(UTC)
+
+    refresh_token = RefreshTable(
+        hashed_token=hash_refresh_token(raw_refresh_token),
+        expire_at=expire,
+        user_id=user.id,
+    )
+
+    db.add(refresh_token)
+    db.commit()
+
+    return TokenPair(access_token=access, refresh_token=raw_refresh_token)
+
+def refresh_access_token(payload: RefreshToken,db: Session):
+    
+    token_row = db.execute(select(RefreshTable).where(RefreshTable.hashed_token == hash_refresh_token(payload.refresh_token))).scalar_one_or_none()
+    
+    if token_row is None:
+        raise InvalideRefreshToken("refresh token is invalid")
+    if token_row.revoked_at is not None:
+        raise RevokedRefreshToken("revoked refresh token")
+    if token_row.expire_at < datetime.now(UTC):
+        raise ExpiredRefreshToken("refresh token is expired")
+    
+    user_uuid = token_row.user_id
+    
+    access = create_access_token(str(user_uuid))
+    raw_refresh_token = create_refresh_token()
+    token_row.revoked_at = datetime.now(UTC)
+    
+    refresh_token = RefreshTable(
+        hashed_token = hash_refresh_token(raw_refresh_token),
+        user_id = user_uuid,
+        expire_at = datetime.now(UTC) + timedelta(days=settings.refresh_token_expires)
+    )
+    db.add(refresh_token)
+    db.commit()
+    
+    return TokenPair(access_token=access,refresh_token = raw_refresh_token)
+    
+def logout_user(payload: RefreshToken, db: Session):
+    
+    token_row = db.execute(select(RefreshTable).where(RefreshTable.hashed_token == hash_refresh_token(payload.refresh_token))).scalar_one_or_none()
+        
+    if token_row is None:
+        return None
+    if token_row.revoked_at is not None:
+        return None
+    if token_row.expire_at < datetime.now(UTC):
+        return None
+    
+    token_row.revoked_at = datetime.now(UTC)
+    
+    db.commit()
+    
+    return None

@@ -1,1 +1,1 @@
-from .user import TokenPair, UserCreate, UserRead  # noqa : F401
+from .user import TokenPair, UserCreate, UserRead,RefreshToken # noqa : F401

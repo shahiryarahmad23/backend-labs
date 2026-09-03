@@ -12,7 +12,7 @@ from klip.core import (
     settings,
     verify_password_hash,
 )
-from klip.models import RefreshToken, User
+from klip.models import RefreshTable, User
 from klip.schemas import TokenPair, UserCreate
 
 
@@ -52,7 +52,7 @@ def login_user(form_data: OAuth2PasswordRequestForm, db: Session):
 
     expire = timedelta(days=settings.refresh_token_expires) + datetime.now(UTC)
 
-    refresh_token = RefreshToken(
+    refresh_token = RefreshTable(
         hashed_token=hash_refresh_token(raw_refresh_token),
         expire_at=expire,
         user_id=user.id,

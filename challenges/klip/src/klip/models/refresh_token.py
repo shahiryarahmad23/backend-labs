@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from klip.db import Base
 
 
-class RefreshToken(Base):
+class RefreshTable(Base):
     __tablename__ = "refresh_tokens"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)

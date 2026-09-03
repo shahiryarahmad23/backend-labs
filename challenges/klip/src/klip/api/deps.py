@@ -9,12 +9,12 @@ from sqlalchemy.orm import Session
 
 from klip.core import decode_access_token
 from klip.db import get_db
-from klip.models import User
+from klip.models import User,UserRole
 
 credential_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Invalid credential",
-    headers={"WWW.Authenticate": "Bearer"},
+    headers={"WWW-Authenticate": "Bearer"},
 )
 oauth_schema = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -44,3 +44,8 @@ def get_current_user(token: str = Depends(oauth_schema), db: Session = Depends(g
         raise credential_exception from None
 
     return user
+
+def require_admin(current_user: User = Depends(get_current_user)):
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Admin access required!")
+    return current_user

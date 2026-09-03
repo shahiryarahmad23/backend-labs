@@ -6,6 +6,9 @@ class Settings(BaseSettings):
     secretkey: str
     access_token_expires: int
     refresh_token_expires: int
+    postgres_user: str
+    postgres_password: str
+    postgres_db: str
 
     model_config = SettingsConfigDict(env_file=".env")
 
