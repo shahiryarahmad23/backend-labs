@@ -1,0 +1,43 @@
+[project]
+name = "klip"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Shahiryar Ahmad", email = "shahiryarahmada7@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.19.1",
+    "argon2-cffi>=25.1.0",
+    "fastapi>=0.141.1",
+    "psycopg[binary]>=3.3.5",
+    "pydantic[email]>=2.13.5",
+    "pydantic-settings>=2.15.0",
+    "sqlalchemy>=2.0.52",
+    "uvicorn[standard]>=0.52.4",
+    "jwt>=1.4.0",
+    "exception>=0.1.0",
+    "python-multipart>=0.0.32",
+    "pyjwt>=2.13.0",
+]
+
+[project.scripts]
+klip = "klip:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 88
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E4","E7","E9","F","I","B","UP"]
+ignore = ["B008"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.5",
+]
