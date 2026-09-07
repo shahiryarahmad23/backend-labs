@@ -1,8 +1,9 @@
 import uuid
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
-from ..models.user import UserRole
+from ..models import UserRole, VisibleValue
 
 
 class UserCreate(BaseModel):
@@ -23,5 +24,22 @@ class TokenPair(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
 
+
 class RefreshToken(BaseModel):
     refresh_token: str
+
+
+class SnippetCreate(BaseModel):
+    title: str
+    body: str
+    visibility: VisibleValue
+    expires_at: datetime | None = None
+
+
+class SnippetRead(BaseModel):
+    owner_id: uuid.UUID
+    title: str
+    body: str
+    visibility: VisibleValue
+    created_at: datetime
+    expires_at: datetime | None = None

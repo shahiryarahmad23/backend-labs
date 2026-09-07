@@ -2,7 +2,7 @@ import hashlib
 import secrets
 from datetime import UTC, datetime, timedelta
 
-import jwt
+import jwt, uuid, base64
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
@@ -30,7 +30,6 @@ def create_access_token(user_id: str):
 
 
 def decode_access_token(token: str):
-    print(token)
     try:
         return jwt.decode(token, settings.secretkey, algorithms=["HS256"])
     except jwt.InvalidTokenError:
@@ -43,3 +42,17 @@ def create_refresh_token():
 
 def hash_refresh_token(token: str):
     return hashlib.sha256(token.encode()).hexdigest()
+
+
+def cursor_encode(created_at: datetime, id: uuid.UUID):
+    return base64.urlsafe_b64encode(
+        (f"{created_at.isoformat()}:{id}").encode()
+    ).decode()
+
+
+def cursor_decode(cursor: str):
+    value = base64.urlsafe_b64decode(cursor.encode()).decode()
+
+    created_at, id = value.split(":")
+
+    return datetime.fromisoformat(created_at), uuid.UUID(id)

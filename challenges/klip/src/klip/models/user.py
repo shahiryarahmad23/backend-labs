@@ -10,8 +10,8 @@ from ..db.base import Base
 
 
 class UserRole(str, Enum):  # noqa : UP042
-    ADMIN = "admin"
-    USER = "user"
+    PRIVILEGED = "privileged"
+    OWNER = "owner"
 
 
 class User(Base):
@@ -21,7 +21,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(nullable=False)
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     role: Mapped[UserRole] = mapped_column(
-        SQLenum(UserRole), nullable=False, default=UserRole.USER
+        SQLenum(UserRole), nullable=False, default=UserRole.OWNER
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

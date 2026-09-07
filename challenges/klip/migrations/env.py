@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 from klip.core import settings
 from klip.db import Base
-from klip.models import User,RefreshToken #noqa : F401
+from klip.models import User,RefreshTable,SnippetTable #noqa : F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
