@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klip</title>
+<style>
+  :root{
+    --bg:#f7f7f5; --panel:#fff; --panel-2:#fafaf8; --ink:#1a1a18; --muted:#6b6b63;
+    --line:#e2e2dc; --accent:#b4552d; --accent-ink:#fff; --danger:#b03030;
+    --ok:#2f7a4f; --code-bg:#f2f2ee; --shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#17171a; --panel:#1f1f23; --panel-2:#26262b; --ink:#ececea; --muted:#9a9a95;
+      --line:#34343a; --accent:#d4713f; --accent-ink:#17171a; --danger:#e06060;
+      --ok:#5fbf8a; --code-bg:#141417; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+  code,pre,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);
+    background:var(--panel-2);color:var(--ink);padding:.5rem .9rem;transition:.12s}
+  button:hover{border-color:var(--muted)}
+  button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+  button.primary:hover{filter:brightness(1.08)}
+  button.ghost{background:transparent;border-color:transparent;color:var(--muted);padding:.35rem .5rem}
+  button.ghost:hover{color:var(--ink);background:var(--panel-2)}
+  button.danger{color:var(--danger);border-color:transparent;background:transparent}
+  button.danger:hover{border-color:var(--danger)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  input,textarea,select{font:inherit;width:100%;padding:.55rem .7rem;border-radius:8px;
+    border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+  textarea{resize:vertical;min-height:11rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.04em;margin-bottom:.3rem}
+  .field{margin-bottom:.9rem}
+  .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:1.25rem;box-shadow:var(--shadow)}
+
+  header{border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
+  .bar{max-width:60rem;margin:0 auto;padding:.7rem 16px;display:flex;gap:.8rem;align-items:center}
+  .logo{font-weight:700;letter-spacing:-.02em;font-size:18px;margin-right:auto;display:flex;gap:.45rem;align-items:center}
+  .logo span{display:inline-block;width:.6rem;height:.6rem;border-radius:2px;background:var(--accent)}
+  .who{font-size:13px;color:var(--muted);max-width:14rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    padding:.12rem .4rem;border-radius:4px;border:1px solid var(--line);color:var(--muted)}
+  .tag.public{color:var(--ok);border-color:currentColor}
+  .tag.unlisted{color:var(--accent);border-color:currentColor}
+  .tag.private{color:var(--muted)}
+  .tag.expired{color:var(--danger);border-color:currentColor}
+
+  main{max-width:60rem;margin:0 auto;padding-block:1.5rem;padding-inline:16px}
+  .tabs{display:flex;gap:.3rem;margin-bottom:1.1rem;border-bottom:1px solid var(--line)}
+  .tabs button{border:none;background:none;border-radius:0;padding:.55rem .8rem;color:var(--muted);
+    border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+
+  .auth-wrap{max-width:24rem;margin:3rem auto}
+  .auth-wrap h1{font-size:22px;margin:0 0 .3rem}
+  .auth-wrap p.sub{color:var(--muted);margin:0 0 1.4rem;font-size:14px}
+
+  ul.list{list-style:none;margin:0;padding:0;display:grid;gap:.7rem}
+  li.item{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.85rem 1rem}
+  li.item h3{margin:0 0 .3rem;font-size:15px;font-weight:650}
+  .meta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  .preview{margin:.55rem 0 .6rem;font-family:ui-monospace,monospace;font-size:12.5px;color:var(--muted);
+    background:var(--code-bg);border-radius:6px;padding:.5rem .6rem;white-space:pre-wrap;
+    max-height:4.2rem;overflow:hidden}
+  pre.body{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:.85rem;
+    overflow-x:auto;font-size:13px;margin:.8rem 0 0}
+  .empty{text-align:center;color:var(--muted);padding:3rem 1rem}
+  .msg{padding:.6rem .8rem;border-radius:8px;font-size:13.5px;margin-bottom:.9rem}
+  .msg.err{background:color-mix(in srgb,var(--danger) 12%,transparent);color:var(--danger)}
+  .msg.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr}}
+  .spin{display:inline-block;width:.85em;height:.85em;border:2px solid currentColor;
+    border-right-color:transparent;border-radius:50%;animation:s .6s linear infinite;vertical-align:-1px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .api-note{font-size:12px;color:var(--muted);margin-top:1.5rem;text-align:center}
+  .api-note input{display:inline-block;width:auto;padding:.2rem .4rem;font-size:12px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="logo"><span></span>klip</div>
+    <div class="who" id="who" hidden></div>
+    <button class="ghost" id="logoutBtn" hidden>Log out</button>
+  </div>
+</header>
+
+<main>
+  <!-- ---------- AUTH ---------- -->
+  <section id="authView" class="auth-wrap">
+    <h1>Klip</h1>
+    <p class="sub" id="authSub">Share code snippets with expiry and visibility control.</p>
+    <div class="panel">
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-authtab="login">Log in</button>
+        <button role="tab" aria-selected="false" data-authtab="register">Register</button>
+      </div>
+      <div id="authMsg"></div>
+      <form id="authForm">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" required>
+        </div>
+        <div class="field" id="confirmField" hidden>
+          <label for="confirm">Confirm password</label>
+          <input id="confirm" type="password" autocomplete="new-password">
+        </div>
+        <button class="primary" id="authSubmit" style="width:100%">Log in</button>
+      </form>
+    </div>
+    <p class="api-note">API <input id="apiBase" spellcheck="false"></p>
+  </section>
+
+  <!-- ---------- APP ---------- -->
+  <section id="appView" hidden>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true"  data-tab="list">My snippets</button>
+      <button role="tab" aria-selected="false" data-tab="new">New snippet</button>
+      <button role="tab" aria-selected="false" data-tab="open">Open by ID</button>
+    </div>
+    <div id="appMsg"></div>
+
+    <!-- list -->
+    <div id="tab-list">
+      <ul class="list" id="snippets"></ul>
+      <div class="row" style="margin-top:1rem;justify-content:center">
+        <button id="moreBtn" hidden>Load more</button>
+      </div>
+    </div>
+
+    <!-- new -->
+    <div id="tab-new" hidden>
+      <form class="panel" id="newForm">
+        <div class="field">
+          <label for="title">Title</label>
+          <input id="title" required maxlength="200" placeholder="nginx reverse proxy config">
+        </div>
+        <div class="field">
+          <label for="body">Body</label>
+          <textarea id="body" spellcheck="false" placeholder="paste your snippet…"></textarea>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="visibility">Visibility</label>
+            <select id="visibility">
+              <option value="public">Public — anyone with the link</option>
+              <option value="unlisted">Unlisted — link only</option>
+              <option value="private">Private — only me</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="expires">Expires at (optional)</label>
+            <input id="expires" type="datetime-local">
+          </div>
+        </div>
+        <button class="primary" id="createBtn">Create snippet</button>
+      </form>
+    </div>
+
+    <!-- open -->
+    <div id="tab-open" hidden>
+      <form class="panel" id="openForm">
+        <div class="field">
+          <label for="pubid">Public ID</label>
+          <input id="pubid" class="mono" spellcheck="false" placeholder="paste a snippet's public id" required>
+        </div>
+        <button class="primary">Fetch</button>
+      </form>
+      <div id="openResult"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+"use strict";
+
+/* ---------- config + token store ---------- */
+const LS = {
+  get(k, d = null) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} },
+};
+
+const DEFAULT_API = location.protocol.startsWith("http") && location.port !== ""
+  ? location.origin : "http://127.0.0.1:8000";
+
+let apiBase = LS.get("klip.api") || DEFAULT_API;
+let access  = LS.get("klip.access");
+let refresh = LS.get("klip.refresh");
+let me      = null;
+
+const $ = (id) => document.getElementById(id);
+$("apiBase").value = apiBase;
+$("apiBase").addEventListener("change", (e) => {
+  apiBase = e.target.value.replace(/\/+$/, "") || DEFAULT_API;
+  LS.set("klip.api", apiBase);
+});
+
+function setTokens(pair) {
+  access = pair.access_token; refresh = pair.refresh_token;
+  LS.set("klip.access", access); LS.set("klip.refresh", refresh);
+}
+function clearTokens() {
+  access = refresh = me = null;
+  LS.del("klip.access"); LS.del("klip.refresh");
+}
+
+/* ---------- HTTP ---------- */
+class ApiError extends Error {
+  constructor(status, detail) { super(detail); this.status = status; }
+}
+
+async function raw(path, { method = "GET", body, form, auth = true } = {}) {
+  const headers = {};
+  if (auth && access) headers.Authorization = "Bearer " + access;
+  let payload;
+  if (form) { payload = form; }
+  else if (body !== undefined) { headers["Content-Type"] = "application/json"; payload = JSON.stringify(body); }
+
+  let res;
+  try {
+    res = await fetch(apiBase + path, { method, headers, body: payload });
+  } catch {
+    throw new ApiError(0, `Cannot reach the API at ${apiBase}. Is uvicorn running?`);
+  }
+  if (res.status === 204) return null;
+
+  const text = await res.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+
+  if (!res.ok) {
+    let detail = (data && data.detail) || data || res.statusText;
+    if (Array.isArray(detail)) detail = detail.map(d => d.msg || JSON.stringify(d)).join("; ");
+    throw new ApiError(res.status, typeof detail === "string" ? detail : JSON.stringify(detail));
+  }
+  return data;
+}
+
+/* one retry through /auth/refresh on a 401 */
+let refreshing = null;
+async function api(path, opts = {}) {
+  try {
+    return await raw(path, opts);
+  } catch (e) {
+    if (!(e instanceof ApiError) || e.status !== 401 || !refresh || opts.auth === false) throw e;
+    refreshing = refreshing || raw("/auth/refresh", {
+      method: "POST", body: { refresh_token: refresh }, auth: false,
+    }).finally(() => { refreshing = null; });
+    let pair;
+    try { pair = await refreshing; }
+    catch { clearTokens(); renderAuth(); throw new ApiError(401, "Session expired — log in again."); }
+    setTokens(pair);
+    return raw(path, opts);
+  }
+}
+
+/* ---------- small helpers ---------- */
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function when(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return isNaN(d) ? null : d.toLocaleString(undefined,
+    { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+const isExpired = (iso) => !!iso && new Date(iso) < new Date();
+
+function msg(el, text, kind = "err") {
+  el.innerHTML = text ? `<div class="msg ${kind}">${esc(text)}</div>` : "";
+  if (text) el.scrollIntoView({ block: "nearest" });
+}
+function busy(btn, on, label) {
+  btn.disabled = on;
+  if (on) { btn.dataset.label = btn.textContent; btn.innerHTML = '<i class="spin"></i> ' + (label || "Working…"); }
+  else if (btn.dataset.label) { btn.textContent = btn.dataset.label; }
+}
+
+/* ---------- tabs ---------- */
+function wireTabs(root, attr, onPick) {
+  root.querySelectorAll(`[${attr}]`).forEach(b => b.addEventListener("click", (e) => {
+    e.preventDefault();
+    root.querySelectorAll(`[${attr}]`).forEach(x => x.setAttribute("aria-selected", String(x === b)));
+    onPick(b.getAttribute(attr));
+  }));
+}
+
+/* ---------- auth screen ---------- */
+let authMode = "login";
+wireTabs($("authView"), "data-authtab", (mode) => {
+  authMode = mode;
+  const reg = mode === "register";
+  $("authSubmit").textContent = reg ? "Create account" : "Log in";
+  $("password").autocomplete = reg ? "new-password" : "current-password";
+  $("confirmField").hidden = !reg;
+  $("confirm").required = reg;
+  if (!reg) $("confirm").value = "";
+  $("authSub").textContent = reg
+    ? "Pick an email and password to create your account."
+    : "Share code snippets with expiry and visibility control.";
+  msg($("authMsg"), "");
+  $("email").focus();
+});
+
+$("authForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = $("authSubmit");
+  const email = $("email").value.trim(), password = $("password").value;
+  msg($("authMsg"), "");
+  busy(btn, true);
+  try {
+    if (authMode === "register") {
+      if (password !== $("confirm").value) throw new ApiError(0, "Passwords do not match.");
+      if (password.length < 8) throw new ApiError(0, "Password must be at least 8 characters.");
+      await raw("/auth/register", { method: "POST", body: { email, password }, auth: false });
+    }
+    const form = new URLSearchParams({ username: email, password });
+    setTokens(await raw("/auth/login", { method: "POST", form, auth: false }));
+    $("password").value = ""; $("confirm").value = "";
+    await enterApp();
+  } catch (err) {
+    msg($("authMsg"), err.message);
+  } finally {
+    busy(btn, false);
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  if (refresh) { try { await raw("/auth/logout", { method: "POST", body: { refresh_token: refresh }, auth: false }); } catch {} }
+  clearTokens();
+  renderAuth();
+});
+
+function renderAuth() {
+  $("appView").hidden = true;
+  $("authView").hidden = false;
+  $("who").hidden = true;
+  $("logoutBtn").hidden = true;
+}
+
+/* ---------- app shell ---------- */
+async function enterApp() {
+  me = await api("/auth/me");
+  $("who").textContent = me.email + (me.role === "privileged" ? " · admin" : "");
+  $("who").hidden = false;
+  $("logoutBtn").hidden = false;
+  $("authView").hidden = true;
+  $("appView").hidden = false;
+  showTab("list");
+  await loadList(true);
+}
+
+function showTab(name) {
+  for (const t of ["list", "new", "open"]) $("tab-" + t).hidden = t !== name;
+  $("appView").querySelectorAll("[data-tab]").forEach(b =>
+    b.setAttribute("aria-selected", String(b.getAttribute("data-tab") === name)));
+  msg($("appMsg"), "");
+}
+wireTabs($("appView"), "data-tab", showTab);
+
+/* ---------- list ---------- */
+let cursor = null;
+
+async function loadList(reset) {
+  if (reset) { cursor = null; $("snippets").innerHTML = ""; }
+  const btn = $("moreBtn");
+  busy(btn, true, "Loading…");
+  try {
+    const qs = new URLSearchParams();
+    if (cursor) qs.set("cursor", cursor);
+    const data = await api("/snippet/snippetlist" + (qs.toString() ? "?" + qs : ""));
+    cursor = data.cursor;
+    renderRows(data.snippets);
+  } catch (e) {
+    /* the API answers 404 when the user simply has no snippets yet */
+    if (e.status === 404) { cursor = null; renderRows([]); }
+    else msg($("appMsg"), e.message);
+  } finally {
+    busy(btn, false);
+    btn.hidden = !cursor;
+  }
+}
+$("moreBtn").addEventListener("click", () => loadList(false));
+
+function renderRows(rows) {
+  const ul = $("snippets");
+  if (!rows.length && !ul.children.length) {
+    ul.innerHTML = `<div class="empty">No snippets yet.<br>Switch to <b>New snippet</b> to make one.</div>`;
+    return;
+  }
+  ul.querySelector(".empty")?.remove();
+  for (const s of rows) ul.appendChild(rowEl(s));
+}
+
+function rowEl(s) {
+  const li = document.createElement("li");
+  li.className = "item";
+  const expired = isExpired(s.expires_at);
+  const exp = s.expires_at ? (expired ? "expired" : "expires " + when(s.expires_at)) : "never expires";
+  li.innerHTML = `
+    <h3>${esc(s.title)}</h3>
+    <div class="meta">
+      <span class="tag ${esc(s.visibility)}">${esc(s.visibility)}</span>
+      ${expired ? '<span class="tag expired">expired</span>' : ""}
+      <span>${esc(when(s.created_at) || "")}</span>
+      <span>·</span><span>${esc(exp)}</span>
+    </div>
+    <div class="preview">${esc((s.body || "").slice(0, 300)) || "<em>empty</em>"}</div>
+    <div class="row">
+      <button class="ghost" data-act="copyid">Copy ID</button>
+      <button class="ghost" data-act="copybody">Copy body</button>
+      <button class="ghost" data-act="open">Open</button>
+      <button class="danger" data-act="del" style="margin-left:auto">Delete</button>
+    </div>`;
+
+  const flash = (btn, t) => { const o = btn.textContent; btn.textContent = t; setTimeout(() => btn.textContent = o, 1200); };
+  const copy = async (text, btn) => {
+    try { await navigator.clipboard.writeText(text); flash(btn, "Copied"); }
+    catch { flash(btn, "Copy failed"); }
+  };
+
+  li.querySelector('[data-act="copyid"]').onclick   = (e) => copy(s.public_id, e.currentTarget);
+  li.querySelector('[data-act="copybody"]').onclick = (e) => copy(s.body || "", e.currentTarget);
+  li.querySelector('[data-act="open"]').onclick = () => {
+    showTab("open"); $("pubid").value = s.public_id; $("openForm").requestSubmit();
+  };
+  li.querySelector('[data-act="del"]').onclick = async (e) => {
+    const btn = e.currentTarget;
+    if (btn.dataset.armed !== "1") {
+      btn.dataset.armed = "1"; btn.textContent = "Really delete?";
+      setTimeout(() => { if (btn.dataset.armed === "1") { btn.dataset.armed = "0"; btn.textContent = "Delete"; } }, 4000);
+      return;
+    }
+    busy(btn, true, "Deleting…");
+    try { await api("/snippet/" + encodeURIComponent(s.public_id), { method: "DELETE" }); li.remove(); }
+    catch (err) { busy(btn, false); msg($("appMsg"), err.message); }
+  };
+  return li;
+}
+
+/* ---------- create ---------- */
+$("newForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = $("createBtn");
+  msg($("appMsg"), "");
+  busy(btn, true, "Creating…");
+  try {
+    const local = $("expires").value;
+    const snippet = await api("/snippet", {
+      method: "POST",
+      body: {
+        title: $("title").value.trim(),
+        body: $("body").value,
+        visibility: $("visibility").value,
+        /* datetime-local has no zone; send it as this browser's absolute time */
+        expires_at: local ? new Date(local).toISOString() : null,
+      },
+    });
+    $("title").value = ""; $("body").value = ""; $("expires").value = "";
+    showTab("list");
+    await loadList(true);
+    msg($("appMsg"), `Created “${snippet.title}” — public id ${snippet.public_id}`, "ok");
+  } catch (err) {
+    msg($("appMsg"), err.message);
+  } finally {
+    busy(btn, false);
+  }
+});
+
+/* ---------- open by id ---------- */
+$("openForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const out = $("openResult");
+  const id = $("pubid").value.trim();
+  if (!id) return;
+  out.innerHTML = `<p class="empty"><i class="spin"></i> Fetching…</p>`;
+  try {
+    const s = await api("/snippet/fetch/" + encodeURIComponent(id));
+    out.innerHTML = `
+      <div class="panel" style="margin-top:1rem">
+        <h3 style="margin:0 0 .4rem">${esc(s.title)}</h3>
+        <div class="meta">
+          <span class="tag ${esc(s.visibility)}">${esc(s.visibility)}</span>
+          <span>${esc(when(s.created_at) || "")}</span>
+          <span>·</span>
+          <span>${s.expires_at ? esc((isExpired(s.expires_at) ? "expired " : "expires ") + when(s.expires_at)) : "never expires"}</span>
+        </div>
+        <pre class="body">${esc(s.body) || "<em>empty</em>"}</pre>
+      </div>`;
+  } catch (err) {
+    out.innerHTML = `<div class="msg err" style="margin-top:1rem">${esc(
+      err.status === 404 ? "Not found — it may be private, expired, or the ID is wrong." : err.message)}</div>`;
+  }
+});
+
+/* ---------- boot ---------- */
+(async () => {
+  if (!access && !refresh) return renderAuth();
+  try { await enterApp(); }
+  catch { clearTokens(); renderAuth(); }
+})();
+
+})();
+
+</script>
+</body>
+</html>

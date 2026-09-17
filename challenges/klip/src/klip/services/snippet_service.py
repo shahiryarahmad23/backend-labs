@@ -39,10 +39,10 @@ def fetch_snippet(public_id: str, db: Session, current_user: User):
         select(SnippetTable).where(SnippetTable.public_id == public_id)
     ).scalar_one_or_none()
 
-    if snippet == None:
+    if snippet is None:
         raise SnippetNotFound("Snippet does not exit")
 
-    if snippet.expires_at < datetime.now(UTC):
+    if snippet.expires_at is not None and snippet.expires_at < datetime.now(UTC):
         raise ExpiredSnippet("Snippet is expired")
 
     if snippet.visibility == VisibleValue.PUBLIC:

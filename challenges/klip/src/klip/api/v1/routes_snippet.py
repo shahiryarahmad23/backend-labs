@@ -67,9 +67,7 @@ def snippet_delete(
 ):
     try:
         return delete_snippet(public_id, current_user, db)
-    except (SnippetForbidden, SnippetNotFound) as e:
-        if e == SnippetForbidden:
-            raise HTTPException(status_code=403, details="Forbidden")
-
-        if e == SnippetNotFound:
-            raise HTTPException(status_code=404, details="NotFound")
+    except SnippetForbidden as e:
+        raise HTTPException(status_code=403, detail="Forbidden") from e
+    except SnippetNotFound as e:
+        raise HTTPException(status_code=404, detail="Not Found") from e
